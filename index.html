@@ -1,0 +1,180 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>OpenFin | Analyzing the Global Financial Technology Ecosystem</title>
+    <meta name="description" content="Analysis of the global FinTech ecosystem.">
+    <meta name="author" content="Shiv Patel">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <link rel="stylesheet" href="./css/nouislider.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+    <div id="body-a">
+        <center>
+            <h2>Loading...</h2>
+            <br>
+            <br>
+            <p>Minimum 1200 px screen width required.
+                <br>
+                <br>For optimal rendering performance,
+                <br>we <strong>highly recommend</strong> using Google Chrome.</p>
+        </center>
+    </div>
+    <div id="body-b">
+        <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+            <div class="container container-menu">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">OpenFin <span class="title-desc">Analyzing the Global Financial Technology Ecosystem</span></a>
+                </div>
+                <div id="navbar">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li style="margin-right:25px;margin-top:10px;">
+                            <div class="button-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-filter
+"></span> Categories&nbsp;&nbsp;<span class="caret"></span></button>
+                                <ul class="dropdown-menu" id="category-menu" style="opacity:.95;">
+                                    <li>
+                                        <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                            <input type="checkbox" checked="" id="selectallinput">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li id="yearSlider-start" style="margin-top:15px;">1994</li>
+                        <li>
+                            <div id="yearSlider" style="margin-left:25px;margin-right:25px;margin-top:15px;width:300px;"></div>
+                        </li>
+                        <li id="yearSlider-end" style="margin-top:15px;">2015</li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <nav class="navbar navbar-default navbar-fixed-top navbar-two">
+            <ul class="nav navbar-nav navbar-nav-two">
+                <li><a href="#">Publication and Backstory</a></li>
+                <li><a onclick="scrollToAnchor('overview')">Annual Activity</a></li>
+                <li><a onclick="scrollToAnchor('category')">Categories</a></li>
+                <li><a onclick="scrollToAnchor('location')">Location</a></li>
+                <li><a onclick="scrollToAnchor('network')">Network</a></li>
+                <li><a data-toggle="modal" data-target=".rawDataModal" onclick="parseDataForRawTable(bigData)">Raw Data</a></li>
+            </ul>
+        </nav>
+        <div class="container container-main">
+            <div class="visual" name="overview">
+                <div class="visual-desc">
+                    <h2>Annual Activity</h2>
+                    <p>Combined total funding (USD) and companies founded each year for the selected categories.</p>
+                    <p class="legend">
+                        <span style="font-size:1.6em;"><span style="color:#0275d8;">&#9632;</span></span>&nbsp;&nbsp;&nbsp;Total Funding
+                        <br>
+                        <span style="font-size:1.6em;"><span style="color:#5cb85c;">&#9632;</span></span>&nbsp;&nbsp;&nbsp;Companies Founded
+                    </p>
+                </div>
+                <div class="visual-main" id="average-total-funding">
+
+                </div>
+            </div>
+            <div class="visual" name="category">
+                <div class="visual-desc">
+                    <h2>Categories</h2>
+                    <p>Annual funding (USD) and companies founded per year breakdown per category using a logarithmic scale.</p>
+                    <p class="legend">
+                        <span style="font-size:1.6em;"><span style="color:#0275d8;">&#9632;</span></span>&nbsp;&nbsp;&nbsp;Total Funding
+                        <br>
+                        <span style="font-size:1.6em;"><span style="color:#5cb85c;">&#9632;</span></span>&nbsp;&nbsp;&nbsp;Companies Founded
+                    </p>
+                </div>
+                <div class="visual-main" id="multiplePlaceholder">
+                </div>
+            </div>
+            <div class="visual" name="location">
+                <div class="visual-desc">
+                    <h2>Location</h2>
+                    <p>
+                        Zoom in and out of the map using your mouse or trackpad scroll. You can also drag and drop any part of the map.
+                    </p>
+                    <p>
+                        <strong><a onclick="repositionGeo()" style="cursor:pointer;">Reset Position and Zoom</a></strong>
+                    </p>
+                    <p class="legend">
+                        <strong>Circle Size</strong>
+                        <br> Encodes the number of companies in that location at the time.
+                    </p>
+                    <p class="legend">
+                        <strong>Color Scale</strong>
+                        <br>Encodes the average total funding (USD) for companies in that location.
+                        <br> Least <span style="font-size:1.6em;"><span style="color:#c51b7d;">&#9632;</span><span style="color:#de77ae;">&#9632;</span><span style="color:#92c5de;">&#9632;</span><span style="color:#2166ac;">&#9632;</span><span style="color:#053061;">&#9632;</span>
+                        </span> Greatest
+                    </p>
+                </div>
+                <div class="visual-main">
+                    <div id="geomap"></div>
+                </div>
+            </div>
+            <div class="visual" name="network">
+                <div class="visual-desc">
+                    <h2>Network</h2>
+                    <p>A network graph showing the financial relations between worldwide investors, companies, and big banks.</p>
+                </div>
+                <div class="visual-main">
+
+                </div>
+            </div>
+            <!-- <div class="visual" name="rawdata">
+                <div class="visual-desc">
+                    <h2>Raw Data</h2>
+                    <p>A network graph showing the financial relations between worldwide investors, companies, and big banks.</p>
+                </div>
+                <div class="visual-main">
+
+                </div>
+            </div> -->
+            <footer>
+                <div class="footer-text">
+                    Research project by <a href="http://shivspatel.com">Shiv Patel</a>. Completed at <a href="http://gatech.edu">Georgia Tech</a> under the supervision of Professor and Stanford Visiting Scholar, <a href="http://www.ti.gatech.edu/basole/about.html">Dr. Rahul C. Basole</a>.
+                    <br>Data provided by <a href="https://www.crunchbase.com/">CrunchBase Inc.</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade rawDataModal" tabindex="-1" role="dialog" aria-labelledby="rawDataModal" style="z-index:9999;">
+        <div class="modal-dialog modal-lg" style="width:1200px;opacity:.95;">
+            <div class="modal-content" style="padding:25px;">
+              <h2>Filtered Raw Data <small><small><span id="rawdatatablecount"></span> entries</small></small></h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Categories</th>
+                            <th>Founded</th>
+                            <th>Funding Total (USD)</th>
+                            <th>Area</th>
+                            <th>Country</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rawdatabody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/d3.v3.min.js"></script>
+    <script src="./js/dimple.v2.1.6.min.js"></script>
+    <script src="./js/topojson.v1.min.js"></script>
+    <script src="./js/jquery-2.2.3.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/nouislider.min.js"></script>
+    <script src="./js/scripts.js"></script>
+</body>
+
+</html>
