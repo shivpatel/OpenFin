@@ -185,7 +185,7 @@ footer {
 
 .container-filter-menu {
   max-width: 900px !important;
-  max-height: calc(100vh - 160px);
+  max-height: 550px;
   margin: 0px 0px 10px 0px;
 }
 
@@ -207,6 +207,6 @@ footer {
 }
 
 .col-filter-menu {
-  max-height: calc(100vh - 160px);
+  max-height: 550px;
   overflow: scroll;
 }
