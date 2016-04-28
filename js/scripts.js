@@ -11,10 +11,9 @@ var countries = [];
 var optionsCategories = [];
 var optionsAreas = [];
 var optionsCountries = [];
+
 var bigData;
 var geoData;
-var geoDataFiltered;
-var annualTotalFundingData = [];
 
 String.prototype.cleanup = function() {
     return this.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-");
@@ -54,24 +53,21 @@ $(function() {
     // Visuals Code
     d3.json("./js/data.json", function(data) {
 
-        bigData = data;
-
-        $.each(bigData, function(index, item) {
-            item.Categories = item.Categories.split("|");
-        });
-
+        // initalize global data
         // initalize filter options drop down menu - data
+        bigData = data;
+        var length = bigData.length;
         var areaSet = new Set();
         var countrySet = new Set();
         var categorySet = new Set();
-        var dataCount = bigData.length;
-        for (var i = 0; i < dataCount; i++) {
-            areaSet.add(bigData[i].Area);
-            countrySet.add(bigData[i].Country);
-            var categoriesCount = bigData[i].Categories.length;
-            for (var j = 0; j < categoriesCount; j++) {
-              categorySet.add(bigData[i].Categories[j]);
-            }
+        for (var i = 0; i < length; i++) {
+          areaSet.add(bigData[i].Area);
+          countrySet.add(bigData[i].Country);
+          bigData[i].Categories = bigData[i].Categories.split("|");
+          var categoriesCount = bigData[i].Categories.length;
+          for (var j = 0; j < categoriesCount; j++) {
+            categorySet.add(bigData[i].Categories[j]);
+          }
         }
         optionsCategories = categories = Array.from(categorySet).sort();
         optionsAreas = areas = Array.from(areaSet).sort();
@@ -93,10 +89,10 @@ $(function() {
             var html = '<li><a href="#" class="small" data-value="' + country + '" tabIndex="-1"><input type="checkbox" checked/>&nbsp;&nbsp;&nbsp;' + country + '</a></li>';
             $("#country-menu").append(html);
         });
-
         // initalize filter options drop down menu - event listeners
         initalizeFilterMenuEventListeners();
 
+        // show viz body to user
         $("#body-a").delay(0).hide(function() {
             $("#body-b").show();
         });
@@ -203,9 +199,6 @@ $(function() {
         });
 
         // geo map
-        geoData = parseDataForGeoMap(bigData);
-        geoDataFiltered = getGeoFilteredData(geoData.data.slice(0))
-        var geoMap;
         generateWorld();
 
         snapSlider.noUiSlider.on('update', function(values, handle) {
@@ -228,7 +221,8 @@ var geoZoom = d3.behavior.zoom();
 
 // Visual Helper Functions
 function generateWorld() {
-
+    geoData = parseDataForGeoMap(bigData);
+    var geoDataFiltered = getGeoFilteredData(geoData.data)
     var width = 950,
         height = 600;
     var projection = d3.geo.mercator()
@@ -360,7 +354,7 @@ function regenerateWorld() {
                 "longitude": a[0].longitude
             }
         })
-        .entries(getGeoFilteredData(geoData.data.slice(0)));
+        .entries(getGeoFilteredData(geoData.data));
 
     geoSvg.selectAll("circle").remove();
     geoSvg.selectAll(".pin")
@@ -443,18 +437,18 @@ function parseDataForGeoMap(data) {
 }
 
 function getGeoFilteredData(data) {
-    for (var i = 0; i < data.length; i++) {
-        var catOk = catFilterAllow(data[i]);
-        if (Number(data[i].founded) >= years[0] && Number(data[i].founded) <= years[1]) {
-            var yearOk = true;
-        } else {
-            var yearOk = false;
-        }
-        if (!yearOk || !catOk) {
-            data.splice(i--, 1);
-        }
-    }
-    return data;
+  var result = []
+  for (var i = 0; i < data.length; i++) {
+      var catOk = catFilterAllow(data[i]);
+      var yearOk = false;
+      if (data[i].founded >= years[0] && data[i].founded <= years[1]) {
+          yearOk = true;
+      }
+      if (yearOk && catOk) {
+          result.push(data[i]);
+      }
+  }
+  return result;
 }
 
 function addCommas(nStr) {
@@ -662,7 +656,6 @@ function createYearStringArray() {
 function getCategoryData(data, category) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].Category == category) {
-          console.log(data[i]);
             return data[i];
         }
     }
@@ -675,43 +668,6 @@ function stringifyCategories(categories) {
     result += categories[i] + ", ";
   }
   return result.slice(0, -2);
-}
-
-function getUniqueObjects(data) {
-  return _.uniqWith(data, _.isEqual);
-}
-
-function parseDataForRawTable(data) {
-    $("#rawdatabody").html("");
-    var result = [];
-    var uniques = getUniqueCompaniesLocations(data);
-    for (var i = 0; i < data.length; i++) {
-        var index = uniques.companies.indexOf(data[i].Name);
-        if (index > -1) {
-            uniques.companies.splice(index, 1);
-            var catOk = catFilterAllow(data[i]);
-            if (Number(data[i].Founded) >= years[0] && Number(data[i].Founded) <= years[1]) {
-                var yearOk = true;
-            } else {
-                var yearOk = false;
-            }
-            if (catOk && yearOk) {
-              var html  = '<tr>';
-                  html += '<td>' + data[i].Name + '</td>';
-                  html += '<td>' + stringifyCategories(data[i].Categories) + '</td>';
-                  html += '<td>' + Number(data[i].Founded) + '</td>';
-                  html += '<td>' + addCommas(data[i]["Funding Total"]) + '</td>';
-                  html += '<td>' + data[i].Area + '</td>';
-                  html += '<td>' + data[i].Country + '</td>';
-                  html += '<td>' + data[i].Status + '</td>';
-                  html += '</tr>';
-              $("#rawdatabody").append(html);
-              result.push(data[i]);
-            }
-        }
-    }
-    $("#rawdatatablecount").html(result.length);
-    return result;
 }
 
 function initalizeFilterMenuEventListeners() {
