@@ -677,6 +677,10 @@ function stringifyCategories(categories) {
   return result.slice(0, -2);
 }
 
+function getUniqueObjects(data) {
+  return _.uniqWith(data, _.isEqual);
+}
+
 function parseDataForRawTable(data) {
     $("#rawdatabody").html("");
     var result = [];
