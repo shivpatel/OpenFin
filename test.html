@@ -1,0 +1,26 @@
+<script src="./js/d3.v3.min.js"></script>
+<script src="./js/dimple.v2.1.6.min.js"></script>
+<script src="./js/topojson.v1.min.js"></script>
+<script src="./js/jquery-2.2.3.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/nouislider.min.js"></script>
+
+<script type="text/javascript">
+    d3.json("//localhost:3000/js/data.json", function(data) {
+
+        var areaSet = new Set();
+        var countrySet = new Set();
+
+        var dataCount = data.length;
+        for (var i = 0; i < dataCount; i++) {
+            areaSet.add(data[i].Area);
+            countrySet.add(data[i].Country);
+        }
+
+        var areas = Array.from(areaSet).sort();
+        var countries = Array.from(countrySet).sort();
+
+        console.log(areas);
+        console.log(countries);
+    });
+</script>

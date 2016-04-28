@@ -3,8 +3,14 @@ var years = [
     1994,
     2015
 ]
-var categories = ["Accounting", "Auctions", "Banking", "Billing", "Bitcoin", "Credit, Credit Cards, and Consumer Lending", "Crowdfunding, Social Fundraising, and Social Investing", "FinTech and Financial Technology", "Financial Services", "Fraud Detection", "Gift Card", "Insurance Companies", "Investment Management, Wealth Management, and Hedge Funds", "P2P Money Transfer", "Payments and Mobile Payments", "Personal Finance", "Point of Sale", "Price Comparison", "Risk Management", "Stock Exchanges", "Trading, Brokers, and Financial Exchanges", "Transaction Processing", "Venture Capital", "Virtual Currency"];
-var options = categories;
+
+var categories = [];
+var areas = [];
+var countries = [];
+
+var optionsCategories = [];
+var optionsAreas = [];
+var optionsCountries = [];
 var bigData;
 var geoData;
 var geoDataFiltered;
@@ -14,65 +20,10 @@ String.prototype.cleanup = function() {
     return this.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-");
 }
 
-// populate category dropdown
-$.each(categories, function(i, category) {
-    var html = '<li><a href="#" class="small" data-value="' + category + '" tabIndex="-1"><input type="checkbox" checked/>&nbsp;&nbsp;&nbsp;' + category + '</a></li>';
-    $("#category-menu").append(html);
-});
-
-$('.dropdown-menu a').on('click', function(event) {
-    var $target = $(event.currentTarget);
-    if ($target.attr('data-value') == "selectall") {
-      // loop through all check boxes
-      if ($target.prop('checked')) {
-        options = categories.slice(0);
-        $target.prop('checked', false);
-        $('.dropdown-menu a').each(function() {
-          if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
-            $(this).parent().find('input:checkbox:first').prop('checked', true);
-          }
-        });
-      } else {
-        options = [];
-        $target.prop('checked', true);
-        $('.dropdown-menu a').each(function() {
-          if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
-            $(this).parent().find('input:checkbox:first').prop('checked', false);
-          }
-        });
-      }
-    } else {
-      targetCategoryClick($(event.currentTarget));
-    }
-    filterVisuals(false, true);
-    regenerateWorld();
-    return false;
-});
-
 function scrollToAnchor(anchorName) {
   $('html, body').animate({
     scrollTop: $('[name="'+anchorName+'"]').offset().top - 120
   }, 500);
-}
-
-function targetCategoryClick(target) {
-  console.log(target);
-  var $target = target,
-      val = $target.attr('data-value'),
-      $inp = $target.find('input'),
-      idx;
-  if ((idx = options.indexOf(val)) > -1) {
-      options.splice(idx, 1);
-      setTimeout(function() {
-          $inp.prop('checked', false)
-      }, 0);
-  } else {
-      options.push(val);
-      setTimeout(function() {
-          $inp.prop('checked', true)
-      }, 0);
-  }
-  $(event.target).blur();
 }
 
 // Year Slider
@@ -98,16 +49,53 @@ var annualTotalFundingSvg = dimple.newSvg("#average-total-funding", 750, 280);
 var annualTotalFunding;
 var smallMultiples = [];
 var smallMultiplesData;
-var smallMultiplesDataFiltered;
 
 $(function() {
     // Visuals Code
     d3.json("./js/data.json", function(data) {
+
         bigData = data;
 
         $.each(bigData, function(index, item) {
             item.Categories = item.Categories.split("|");
         });
+
+        // initalize filter options drop down menu - data
+        var areaSet = new Set();
+        var countrySet = new Set();
+        var categorySet = new Set();
+        var dataCount = bigData.length;
+        for (var i = 0; i < dataCount; i++) {
+            areaSet.add(bigData[i].Area);
+            countrySet.add(bigData[i].Country);
+            var categoriesCount = bigData[i].Categories.length;
+            for (var j = 0; j < categoriesCount; j++) {
+              categorySet.add(bigData[i].Categories[j]);
+            }
+        }
+        optionsCategories = categories = Array.from(categorySet).sort();
+        optionsAreas = areas = Array.from(areaSet).sort();
+        optionsCountries = countries = Array.from(countrySet).sort();
+
+        // initalize filter options drop down menu - dom elements
+        $("#filter-menu-categories-count").html(categories.length);
+        $("#filter-menu-countries-count").html(countries.length);
+        $("#filter-menu-areas-count").html(areas.length);
+        $.each(categories, function(i, category) {
+            var html = '<li><a href="#" class="small" data-value="' + category + '" tabIndex="-1"><input type="checkbox" checked/>&nbsp;&nbsp;&nbsp;' + category + '</a></li>';
+            $("#category-menu").append(html);
+        });
+        $.each(areas, function(i, area) {
+            var html = '<li><a href="#" class="small" data-value="' + area + '" tabIndex="-1"><input type="checkbox" checked/>&nbsp;&nbsp;&nbsp;' + area + '</a></li>';
+            $("#area-menu").append(html);
+        });
+        $.each(countries, function(i, country) {
+            var html = '<li><a href="#" class="small" data-value="' + country + '" tabIndex="-1"><input type="checkbox" checked/>&nbsp;&nbsp;&nbsp;' + country + '</a></li>';
+            $("#country-menu").append(html);
+        });
+
+        // initalize filter options drop down menu - event listeners
+        initalizeFilterMenuEventListeners();
 
         $("#body-a").delay(0).hide(function() {
             $("#body-b").show();
@@ -409,22 +397,6 @@ function repositionGeo() {
   geoSvg.attr("transform","");
 }
 
-// function test() {
-//   var places = d3.nest()
-//               .key(function(d) { return d.area; })
-//               .rollup(function(a) {
-//                 return {
-//                   "fundingTotal": d3.mean(a, function(d) { return Number(d.fundingTotal); }).toFixed(0),
-//                   "companyCount": a.length,
-//                   "latitude": a[0].latitude,
-//                   "longitude": a[0].longitude
-//                 }
-//               })
-//               .entries(geoDataFiltered);
-//               console.log(places);
-//   geoSvg.data(places).exit().remove();
-// }
-
 function getUniqueCompaniesLocations(data) {
     var companies = [];
     var locations = [];
@@ -454,9 +426,12 @@ function parseDataForGeoMap(data) {
                 founded: data[i].Founded,
                 fundingTotal: Number(data[i]["Funding Total"]),
                 area: data[i].Area,
+                Area: data[i].Area,
+                Country: data[i].Country,
                 latitude: data[i].Latitude,
                 longitude: data[i].Longitude,
-                categories: data[i].Categories
+                categories: data[i].Categories,
+                Categories: data[i].Categories
             });
             uniques.companies.splice(index, 1);
         }
@@ -469,7 +444,7 @@ function parseDataForGeoMap(data) {
 
 function getGeoFilteredData(data) {
     for (var i = 0; i < data.length; i++) {
-        var catOk = catFilterAllow(data[i].categories);
+        var catOk = catFilterAllow(data[i]);
         if (Number(data[i].founded) >= years[0] && Number(data[i].founded) <= years[1]) {
             var yearOk = true;
         } else {
@@ -498,17 +473,22 @@ function filterVisuals(yearChanged, doSmalls) {
     annualTotalFunding.data = calcAnnualTotalFundingData();
     annualTotalFunding.draw();
     if (doSmalls) {
+      smallMultiplesData = getSmallMultipleData(bigData);
       $.each(smallMultiples, function(i, graph) {
+          var hide = true;
           var catData = getCategoryData(smallMultiplesData, graph.category);
-          var yearsTmp = createYearStringArray();
-          graph.chart.series[0].data = dimple.filterData(catData.FundingPerYear, "Year", yearsTmp);
-          graph.chart.series[1].data = dimple.filterData(catData.FoundedPerYear, "Year", yearsTmp);
-          graph.chart.axes[0].overrideMin = new Date(years[0].toString());
-          graph.chart.axes[0].overrideMax = new Date(years[1].toString());
-          if (yearChanged) {
-              graph.chart.draw();
+          if (catData != null) {
+            hide = false;
+            var yearsTmp = createYearStringArray();
+            graph.chart.series[0].data = dimple.filterData(catData.FundingPerYear, "Year", yearsTmp);
+            graph.chart.series[1].data = dimple.filterData(catData.FoundedPerYear, "Year", yearsTmp);
+            graph.chart.axes[0].overrideMin = new Date(years[0].toString());
+            graph.chart.axes[0].overrideMax = new Date(years[1].toString());
+            if (yearChanged) {
+                graph.chart.draw();
+            }
           }
-          if (options.indexOf(graph.category) == -1) {
+          if (optionsCategories.indexOf(graph.category) == -1 || hide) {
               $("#main-viz-multiple-" + graph.category.cleanup()).css("visibility", "hidden").css("width","0").css("height","0");
           } else {
               $("#main-viz-multiple-" + graph.category.cleanup()).css("visibility", "visible").css("width","315px").css("height","250px");
@@ -522,7 +502,7 @@ function calcAnnualTotalFundingData() {
     var years = [];
     for (var i = 0; i < bigData.length; i++) {
         var item = bigData[i];
-        if (catFilterAllow(item.Categories)) {
+        if (catFilterAllow(item)) {
             if (years.indexOf(item.Year) == -1) {
                 if (between(item.Year)) {
                     years.push(item.Year);
@@ -562,13 +542,23 @@ function between(year) {
     }
 }
 
-function catFilterAllow(itemCats) {
-    for (var i = 0; i < options.length; i++) {
-        if (itemCats.indexOf(options[i]) > -1) {
-            return true;
-        }
+function catFilterAllow(item) {
+    var catAllow = false;
+    var areaAllow = false;
+    var countryAllow = false;
+    for (var i = 0; i < item.Categories.length; i++) {
+      if (optionsCategories.indexOf(item.Categories[i]) != -1) {
+        catAllow = true;
+        break;
+      }
     }
-    return false;
+    if (optionsAreas.indexOf(item.Area) != -1) areaAllow = true;
+    if (optionsCountries.indexOf(item.Country) != -1) countryAllow = true;
+    if (catAllow && areaAllow && countryAllow) {
+      return true;
+    } else {
+      return false;
+    }
 }
 
 function getSmallMultipleData(data) {
@@ -584,57 +574,59 @@ function getSmallMultipleData(data) {
             processAmount = false;
             item.Amount = 0;
         }
-        $.each(item.Categories, function(catIndex, category) {
-            var catExist = categoryExist(category, tmp);
-            if (catExist != -1) {
-                // category exists
-                if (processAmount) {
-                    // funding
-                    var fundingYearExist = yearExist(item.Year, tmp[catExist].FundingPerYear);
-                    if (fundingYearExist == -1) {
-                        // funding year not in category
-                        tmp[catExist].FundingPerYear.push({
-                            "Year": item.Year.toString(),
-                            "Total Funding ($)": Number(item.Amount),
-                            "Type": "Funding"
-                        });
-                    } else {
-                        // funding year in category
-                        tmp[catExist].FundingPerYear[fundingYearExist]["Total Funding ($)"] += item.Amount;
-                    }
-                }
-                // founded
-                if (processAmount) {
-                    var foundedYearExist = yearExist(item.Founded.toString(), tmp[catExist].FoundedPerYear);
-                    if (foundedYearExist == -1) {
-                        // founded year not in category
-                        tmp[catExist].FoundedPerYear.push({
-                            "Year": item.Founded.toString(),
-                            "Companies Founded": 1,
-                            "Type": "Founded"
-                        });
-                    } else {
-                        // founded year in category
-                        tmp[catExist].FoundedPerYear[foundedYearExist]["Companies Founded"]++;
-                    }
-                }
-            } else {
-                // category does not exist
-                tmp.push({
-                    Category: category,
-                    FundingPerYear: [{
-                        "Year": item.Year.toString(),
-                        "Total Funding ($)": Number(item.Amount),
-                        "Type": "Funding"
-                    }],
-                    FoundedPerYear: [{
-                        "Year": item.Founded.toString(),
-                        "Companies Founded": 1,
-                        "Type": "Founded"
-                    }]
-                })
-            }
-        });
+        if (optionsAreas.indexOf(item.Area) != -1 && optionsCountries.indexOf(item.Country) != -1) {
+          $.each(item.Categories, function(catIndex, category) {
+              var catExist = categoryExist(category, tmp);
+              if (catExist != -1) {
+                  // category exists
+                  if (processAmount) {
+                      // funding
+                      var fundingYearExist = yearExist(item.Year, tmp[catExist].FundingPerYear);
+                      if (fundingYearExist == -1) {
+                          // funding year not in category
+                          tmp[catExist].FundingPerYear.push({
+                              "Year": item.Year.toString(),
+                              "Total Funding ($)": Number(item.Amount),
+                              "Type": "Funding"
+                          });
+                      } else {
+                          // funding year in category
+                          tmp[catExist].FundingPerYear[fundingYearExist]["Total Funding ($)"] += item.Amount;
+                      }
+                  }
+                  // founded
+                  if (processAmount) {
+                      var foundedYearExist = yearExist(item.Founded.toString(), tmp[catExist].FoundedPerYear);
+                      if (foundedYearExist == -1) {
+                          // founded year not in category
+                          tmp[catExist].FoundedPerYear.push({
+                              "Year": item.Founded.toString(),
+                              "Companies Founded": 1,
+                              "Type": "Founded"
+                          });
+                      } else {
+                          // founded year in category
+                          tmp[catExist].FoundedPerYear[foundedYearExist]["Companies Founded"]++;
+                      }
+                  }
+              } else {
+                  // category does not exist
+                  tmp.push({
+                      Category: category,
+                      FundingPerYear: [{
+                          "Year": item.Year.toString(),
+                          "Total Funding ($)": Number(item.Amount),
+                          "Type": "Funding"
+                      }],
+                      FoundedPerYear: [{
+                          "Year": item.Founded.toString(),
+                          "Companies Founded": 1,
+                          "Type": "Founded"
+                      }]
+                  })
+              }
+          });
+        }
     });
     return tmp;
 }
@@ -657,22 +649,6 @@ function categoryExist(category, list) {
     return -1;
 }
 
-// function filteredSmallMultipleYears(data) {
-//   for (var i = 0; i < data.length; i++) {
-//     for (var j = 0; j < data[i].FundingPerYear.length; j++) {
-//       if (data[i].FundingPerYear[j].Year < years[0] || data[i].FundingPerYear[j].Year > years[1] || data[i].FundingPerYear[j].Year == null) {
-//         data[i].FundingPerYear.splice(j--,1);
-//       }
-//     }
-//     for (var j = 0; j < data[i].FoundedPerYear.length; j++) {
-//       if (data[i].FoundedPerYear[j].Year < years[0] || data[i].FoundedPerYear[j].Year > years[1] || data[i].FoundedPerYear[j].Year == null) {
-//         data[i].FoundedPerYear.splice(j--,1);
-//       }
-//     }
-//   }
-//   return data;
-// }
-
 function createYearStringArray() {
     var arr = [];
     for (var i = years[0]; i < years[1]; i++) {
@@ -684,10 +660,11 @@ function createYearStringArray() {
 function getCategoryData(data, category) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].Category == category) {
+          console.log(data[i]);
             return data[i];
         }
     }
-    return {};
+    return null;
 }
 
 function stringifyCategories(categories) {
@@ -706,7 +683,7 @@ function parseDataForRawTable(data) {
         var index = uniques.companies.indexOf(data[i].Name);
         if (index > -1) {
             uniques.companies.splice(index, 1);
-            var catOk = catFilterAllow(data[i].Categories);
+            var catOk = catFilterAllow(data[i]);
             if (Number(data[i].Founded) >= years[0] && Number(data[i].Founded) <= years[1]) {
                 var yearOk = true;
             } else {
@@ -729,4 +706,151 @@ function parseDataForRawTable(data) {
     }
     $("#rawdatatablecount").html(result.length);
     return result;
+}
+
+function initalizeFilterMenuEventListeners() {
+  // categories
+  $('#category-menu a').on('click', function(event) {
+      var $target = $(event.currentTarget);
+      if ($target.attr('data-value') == "selectall") {
+        // loop through all check boxes
+        if ($target.prop('checked')) {
+          optionsCategories = categories.slice(0);
+          $target.prop('checked', false);
+          $('#category-menu a').each(function() {
+            if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
+              $(this).parent().find('input:checkbox:first').prop('checked', true);
+            }
+          });
+        } else {
+          optionsCategories = [];
+          $target.prop('checked', true);
+          $('#category-menu a').each(function() {
+            if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
+              $(this).parent().find('input:checkbox:first').prop('checked', false);
+            }
+          });
+        }
+      } else {
+        targetCategoryClick($(event.currentTarget));
+      }
+      filterVisuals(false, true);
+      regenerateWorld();
+      return false;
+  });
+  // areas
+  $('#area-menu a').on('click', function(event) {
+      var $target = $(event.currentTarget);
+      if ($target.attr('data-value') == "selectall") {
+        // loop through all check boxes
+        if ($target.prop('checked')) {
+          optionsAreas = areas.slice(0);
+          $target.prop('checked', false);
+          $('#area-menu a').each(function() {
+            if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
+              $(this).parent().find('input:checkbox:first').prop('checked', true);
+            }
+          });
+        } else {
+          optionsAreas = [];
+          $target.prop('checked', true);
+          $('#area-menu a').each(function() {
+            if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
+              $(this).parent().find('input:checkbox:first').prop('checked', false);
+            }
+          });
+        }
+      } else {
+        targetAreaClick($(event.currentTarget));
+      }
+      filterVisuals(true, true);
+      regenerateWorld();
+      return false;
+  });
+  // countries
+  $('#country-menu a').on('click', function(event) {
+      var $target = $(event.currentTarget);
+      if ($target.attr('data-value') == "selectall") {
+        // loop through all check boxes
+        if ($target.prop('checked')) {
+          optionsCountries = countries.slice(0);
+          $target.prop('checked', false);
+          $('#country-menu a').each(function() {
+            if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
+              $(this).parent().find('input:checkbox:first').prop('checked', true);
+            }
+          });
+        } else {
+          optionsCountries = [];
+          $target.prop('checked', true);
+          $('#country-menu a').each(function() {
+            if ($(this).parent().find('input:checkbox:first').attr('data-value') != "selectall") {
+              $(this).parent().find('input:checkbox:first').prop('checked', false);
+            }
+          });
+        }
+      } else {
+        targetCountryClick($(event.currentTarget));
+      }
+      filterVisuals(true, true);
+      regenerateWorld();
+      return false;
+  });
+}
+
+function targetCategoryClick(target) {
+  var $target = target,
+      val = $target.attr('data-value'),
+      $inp = $target.find('input'),
+      idx;
+  if ((idx = optionsCategories.indexOf(val)) > -1) {
+      optionsCategories.splice(idx, 1);
+      setTimeout(function() {
+          $inp.prop('checked', false)
+      }, 0);
+  } else {
+      optionsCategories.push(val);
+      setTimeout(function() {
+          $inp.prop('checked', true)
+      }, 0);
+  }
+  $(event.target).blur();
+}
+
+function targetAreaClick(target) {
+  var $target = target,
+      val = $target.attr('data-value'),
+      $inp = $target.find('input'),
+      idx;
+  if ((idx = optionsAreas.indexOf(val)) > -1) {
+      optionsAreas.splice(idx, 1);
+      setTimeout(function() {
+          $inp.prop('checked', false)
+      }, 0);
+  } else {
+      optionsAreas.push(val);
+      setTimeout(function() {
+          $inp.prop('checked', true)
+      }, 0);
+  }
+  $(event.target).blur();
+}
+
+function targetCountryClick(target) {
+  var $target = target,
+      val = $target.attr('data-value'),
+      $inp = $target.find('input'),
+      idx;
+  if ((idx = optionsCountries.indexOf(val)) > -1) {
+      optionsCountries.splice(idx, 1);
+      setTimeout(function() {
+          $inp.prop('checked', false)
+      }, 0);
+  } else {
+      optionsCountries.push(val);
+      setTimeout(function() {
+          $inp.prop('checked', true)
+      }, 0);
+  }
+  $(event.target).blur();
 }
