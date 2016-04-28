@@ -31,20 +31,46 @@
         <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
             <div class="container container-menu">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#">OpenFin <span class="title-desc">Analyzing the Global Financial Technology Ecosystem</span></a>
+                    <a class="navbar-brand">OpenFin <span class="title-desc">Analyzing the Global Financial Technology Ecosystem</span></a>
                 </div>
                 <div id="navbar">
                     <ul class="nav navbar-nav navbar-right">
                         <li style="margin-right:25px;margin-top:10px;">
                             <div class="button-group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-filter
-"></span> Categories&nbsp;&nbsp;<span class="caret"></span></button>
-                                <ul class="dropdown-menu" id="category-menu" style="opacity:.95;">
-                                    <li>
-                                        <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
-                                            <input type="checkbox" checked="" id="selectallinput">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
-                                    </li>
-                                </ul>
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-filter"></span> Filter Options&nbsp;&nbsp;<span class="caret"></span></button>
+                                <div class="dropdown-menu dropdown-menu-main">
+                                  <div class="container container-filter-menu">
+                                    <div class="row">
+                                      <div class="col-sm-6 col-filter-menu">
+                                        <h4>Categories <small>(<span id="filter-menu-categories-count"></span>)</small></h4>
+                                        <ul class="dropdown-menu-custom" id="category-menu">
+                                            <li>
+                                                <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                                    <input type="checkbox" checked="" id="selectallinput">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                            </li>
+                                        </ul>
+                                      </div>
+                                      <div class="col-sm-3 col-filter-menu">
+                                        <h4>Areas <small>(<span id="filter-menu-areas-count"></span>)</small></h4>
+                                        <ul class="dropdown-menu-custom" id="area-menu">
+                                            <li>
+                                                <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                                    <input type="checkbox" checked="" id="selectallinput-area">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                            </li>
+                                        </ul>
+                                      </div>
+                                      <div class="col-sm-3 col-filter-menu">
+                                        <h4>Countries <small>(<span id="filter-menu-countries-count"></span>)</small></h4>
+                                        <ul class="dropdown-menu-custom" id="country-menu">
+                                            <li>
+                                                <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                                    <input type="checkbox" checked="" id="selectallinput-country">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                            </li>
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                             </div>
                         </li>
                         <li id="yearSlider-start" style="margin-top:15px;">1994</li>
@@ -148,7 +174,7 @@
     <div class="modal fade rawDataModal" tabindex="-1" role="dialog" aria-labelledby="rawDataModal" style="z-index:9999;">
         <div class="modal-dialog modal-lg" style="width:1200px;opacity:.95;">
             <div class="modal-content" style="padding:25px;">
-              <h2>Filtered Raw Data <small><small><span id="rawdatatablecount"></span> entries</small></small></h2>
+                <h2>Filtered Raw Data <small><small><span id="rawdatatablecount"></span> entries</small></small></h2>
                 <table class="table table-striped">
                     <thead>
                         <tr>

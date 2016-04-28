@@ -180,3 +180,33 @@ footer {
   font-size: .8em;
   line-height: 1.4em;
 }
+
+/* Custom Filter Drop Down Menu */
+
+.container-filter-menu {
+  max-width: 900px !important;
+  max-height: calc(100vh - 160px);
+  margin: 0px 0px 10px 0px;
+}
+
+.dropdown-menu-main {
+  right: -300px !important;
+  opacity: .98;
+}
+
+.dropdown-menu-custom {
+  margin: 2px 25px;
+  padding: 0;
+  list-style: none;
+  text-indent: -22px;
+}
+
+.dropdown-menu-custom a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.col-filter-menu {
+  max-height: calc(100vh - 160px);
+  overflow: scroll;
+}
