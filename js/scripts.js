@@ -523,11 +523,13 @@ function calcAnnualTotalFundingData() {
         }
     }
     for (var i = 0; i < bigData.length; i++) {
-      var founded = Number(bigData[i].Founded);
-      for (var j = 0; j < tmp.length; j++) {
-        if (tmp[j].Year == founded) {
-          tmp[j]["Companies Founded"]++;
-          break;
+      if (catFilterAllow(bigData[i])) {
+        var founded = Number(bigData[i].Founded);
+        for (var j = 0; j < tmp.length; j++) {
+          if (tmp[j].Year == founded) {
+            tmp[j]["Companies Founded"]++;
+            break;
+          }
         }
       }
     }
