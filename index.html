@@ -39,37 +39,37 @@
                             <div class="button-group">
                                 <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-filter"></span> Filter Options&nbsp;&nbsp;<span class="caret"></span></button>
                                 <div class="dropdown-menu dropdown-menu-main">
-                                  <div class="container container-filter-menu">
-                                    <div class="row">
-                                      <div class="col-sm-6 col-filter-menu">
-                                        <h4>Categories <small>(<span id="filter-menu-categories-count"></span>)</small></h4>
-                                        <ul class="dropdown-menu-custom" id="category-menu">
-                                            <li>
-                                                <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
-                                                    <input type="checkbox" checked="" id="selectallinput">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
-                                            </li>
-                                        </ul>
-                                      </div>
-                                      <div class="col-sm-3 col-filter-menu">
-                                        <h4>Areas <small>(<span id="filter-menu-areas-count"></span>)</small></h4>
-                                        <ul class="dropdown-menu-custom" id="area-menu">
-                                            <li>
-                                                <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
-                                                    <input type="checkbox" checked="" id="selectallinput-area">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
-                                            </li>
-                                        </ul>
-                                      </div>
-                                      <div class="col-sm-3 col-filter-menu">
-                                        <h4>Countries <small>(<span id="filter-menu-countries-count"></span>)</small></h4>
-                                        <ul class="dropdown-menu-custom" id="country-menu">
-                                            <li>
-                                                <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
-                                                    <input type="checkbox" checked="" id="selectallinput-country">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
-                                            </li>
-                                        </ul>
-                                      </div>
+                                    <div class="container container-filter-menu">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-filter-menu">
+                                                <h4>Categories <small>(<span id="filter-menu-categories-count"></span>)</small></h4>
+                                                <ul class="dropdown-menu-custom" id="category-menu">
+                                                    <li>
+                                                        <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                                            <input type="checkbox" checked="" id="selectallinput">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-sm-3 col-filter-menu">
+                                                <h4>Areas <small>(<span id="filter-menu-areas-count"></span>)</small></h4>
+                                                <ul class="dropdown-menu-custom" id="area-menu">
+                                                    <li>
+                                                        <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                                            <input type="checkbox" checked="" id="selectallinput-area">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-sm-3 col-filter-menu">
+                                                <h4>Countries <small>(<span id="filter-menu-countries-count"></span>)</small></h4>
+                                                <ul class="dropdown-menu-custom" id="country-menu">
+                                                    <li>
+                                                        <a href="#" class="small" data-value="selectall" tabindex="-1" style="font-weight:700;">
+                                                            <input type="checkbox" checked="" id="selectallinput-country">&nbsp;&nbsp;&nbsp;Select All / Clear All</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
                                     </div>
-                                  </div>
                                 </div>
                             </div>
                         </li>
@@ -88,8 +88,6 @@
                 <li><a onclick="scrollToAnchor('overview')">Annual Activity</a></li>
                 <li><a onclick="scrollToAnchor('category')">Categories</a></li>
                 <li><a onclick="scrollToAnchor('location')">Location</a></li>
-                <li><a onclick="scrollToAnchor('network')">Network</a></li>
-                <li><a data-toggle="modal" data-target=".rawDataModal" onclick="parseDataForRawTable(bigData)">Raw Data</a></li>
             </ul>
         </nav>
         <div class="container container-main">
@@ -144,24 +142,6 @@
                     <div id="geomap"></div>
                 </div>
             </div>
-            <div class="visual" name="network">
-                <div class="visual-desc">
-                    <h2>Network</h2>
-                    <p>A network graph showing the financial relations between worldwide investors, companies, and big banks.</p>
-                </div>
-                <div class="visual-main">
-
-                </div>
-            </div>
-            <!-- <div class="visual" name="rawdata">
-                <div class="visual-desc">
-                    <h2>Raw Data</h2>
-                    <p>A network graph showing the financial relations between worldwide investors, companies, and big banks.</p>
-                </div>
-                <div class="visual-main">
-
-                </div>
-            </div> -->
             <footer>
                 <div class="footer-text">
                     Research project by <a href="http://shivspatel.com">Shiv Patel</a>. Completed at <a href="http://gatech.edu">Georgia Tech</a> under the supervision of Professor and Stanford Visiting Scholar, <a href="http://www.ti.gatech.edu/basole/about.html">Dr. Rahul C. Basole</a>.
@@ -170,35 +150,10 @@
             </footer>
         </div>
     </div>
-
-    <div class="modal fade rawDataModal" tabindex="-1" role="dialog" aria-labelledby="rawDataModal" style="z-index:9999;">
-        <div class="modal-dialog modal-lg" style="width:1200px;opacity:.95;">
-            <div class="modal-content" style="padding:25px;">
-                <h2>Filtered Raw Data <small><small><span id="rawdatatablecount"></span> entries</small></small></h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Categories</th>
-                            <th>Founded</th>
-                            <th>Funding Total (USD)</th>
-                            <th>Area</th>
-                            <th>Country</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rawdatabody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <script src="./js/d3.v3.min.js"></script>
     <script src="./js/dimple.v2.1.6.min.js"></script>
     <script src="./js/topojson.v1.min.js"></script>
     <script src="./js/jquery-2.2.3.min.js"></script>
-    <script src="./js/lodash.js"></script>
     <script src="./js/bootstrap.min.js"></script>
     <script src="./js/nouislider.min.js"></script>
     <script src="./js/scripts.js"></script>
