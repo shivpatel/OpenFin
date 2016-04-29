@@ -133,8 +133,11 @@ $(function() {
             var obj = {};
             obj.category = category;
 
+            var catData = getCategoryData(smallMultiplesData, category);
+            var catCount = getCompanyCountForCatInSmallMultiples(catData);
+
             // dom div creation
-            var html = '<div class="smallmultiple" id="main-viz-multiple-' + category.cleanup() + '"><h3>' + category + '</h3><div class="smallmultiple-visual" id="viz-multiple-' + category.cleanup() + '"></div></div>';
+            var html = '<div class="smallmultiple" id="main-viz-multiple-' + category.cleanup() + '"><h3>' + category + ' <span class="smallmultiple-count">('+catCount+')<span></h3><div class="smallmultiple-visual" id="viz-multiple-' + category.cleanup() + '"></div></div>';
             $("#multiplePlaceholder").append(html);
 
             obj.svg = dimple.newSvg("#viz-multiple-" + category.cleanup(), 315, 200);
@@ -183,8 +186,6 @@ $(function() {
             y2.useLog = true;
             // y2.logBase = 2;
             y2.title = "";
-
-            var catData = getCategoryData(smallMultiplesData, category);
 
             s1.data = catData.FundingPerYear;
             s2.data = catData.FoundedPerYear;
@@ -471,6 +472,9 @@ function filterVisuals(yearChanged, doSmalls) {
       $.each(smallMultiples, function(i, graph) {
           var hide = true;
           var catData = getCategoryData(smallMultiplesData, graph.category);
+          var catCount = getCompanyCountForCatInSmallMultiples(catData);
+          var catDivID = '#main-viz-multiple-' + catData.Category.cleanup();
+          $(catDivID + " .smallmultiple-count").html('('+catCount+')');
           if (catData != null) {
             hide = false;
             var yearsTmp = createYearStringArray();
@@ -815,4 +819,17 @@ function targetCountryClick(target) {
       }, 0);
   }
   $(event.target).blur();
+}
+
+function getCompanyCountForCatInSmallMultiples(data) {
+  var length = data.FoundedPerYear.length;
+  var num = 0;
+  for (var i = 0; i < length; i++) {
+    var year = Number(data.FoundedPerYear[i]["Year"]);
+    var count = Number(data.FoundedPerYear[i]["Companies Founded"]);
+    if (year >= years[0] && year <= years[1]) {
+      num += count;
+    }
+  }
+  return num;
 }
