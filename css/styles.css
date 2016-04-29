@@ -180,6 +180,9 @@ footer {
   font-size: .8em;
   line-height: 1.4em;
 }
+.smallmultiple-count {
+  opacity: .5;
+}
 
 /* Custom Filter Drop Down Menu */
 
