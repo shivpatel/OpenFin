@@ -151,6 +151,32 @@
             </footer>
         </div>
     </div>
+
+    <div class="detailtable" id="detailtable">
+        <div class="container">
+            <p onclick="toggleDetailTable()">Close Details</p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Categories</th>
+                        <th>Area</th>
+                        <th>Country</th>
+                        <th>Founded</th>
+                        <th style="text-align:right">Funding Total</th>
+                        <th style="text-align:right">Funding Amount</th>
+                        <th>Funding Year</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="detailtable-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="detailtable-padder"></div>
+
     <script src="./js/d3.v3.min.js"></script>
     <script src="./js/dimple.v2.1.6.min.js"></script>
     <script src="./js/topojson.v1.min.js"></script>
