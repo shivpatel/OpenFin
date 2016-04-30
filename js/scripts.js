@@ -275,6 +275,11 @@ function generateWorld() {
     d3.json("./js/world-50m.json", function(error, world) {
         if (error) throw error;
 
+        setTimeout(function() {
+          // IMPORTANT builds the detail table for initial load
+          rebuildDetailOnDemandTableListeners();
+        }, 1000);
+
         geoSvg.insert("path", ".graticule")
             .datum(topojson.feature(world, world.objects.land))
             .attr("class", "land")
@@ -465,6 +470,10 @@ function addCommas(nStr) {
 }
 
 function filterVisuals(yearChanged, doSmalls) {
+    setTimeout(function() {
+      // rebuilds the detail table for initial load
+      rebuildDetailOnDemandTableListeners();
+    }, 1000);
     annualTotalFunding.data = calcAnnualTotalFundingData();
     annualTotalFunding.draw();
     if (doSmalls) {
@@ -587,7 +596,8 @@ function getSmallMultipleData(data) {
                           tmp[catExist].FundingPerYear.push({
                               "Year": item.Year.toString(),
                               "Total Funding ($)": Number(item.Amount),
-                              "Type": "Funding"
+                              "Type": "Funding",
+                              "Category": category
                           });
                       } else {
                           // funding year in category
@@ -602,7 +612,8 @@ function getSmallMultipleData(data) {
                           tmp[catExist].FoundedPerYear.push({
                               "Year": item.Founded.toString(),
                               "Companies Founded": 1,
-                              "Type": "Founded"
+                              "Type": "Founded",
+                              "Category": category
                           });
                       } else {
                           // founded year in category
@@ -616,12 +627,14 @@ function getSmallMultipleData(data) {
                       FundingPerYear: [{
                           "Year": item.Year.toString(),
                           "Total Funding ($)": Number(item.Amount),
-                          "Type": "Funding"
+                          "Type": "Funding",
+                          "Category": category
                       }],
                       FoundedPerYear: [{
                           "Year": item.Founded.toString(),
                           "Companies Founded": 1,
-                          "Type": "Founded"
+                          "Type": "Founded",
+                          "Category": category
                       }]
                   })
               }
@@ -832,4 +845,89 @@ function getCompanyCountForCatInSmallMultiples(data) {
     }
   }
   return num;
+}
+
+function rebuildDetailOnDemandTableListeners() {
+  d3.selectAll("#average-total-funding circle").on("click", function(e){ averageTotalFundingCircleHandlers(e) });
+  d3.selectAll("#multiplePlaceholder circle").on("click", function(e, i){ smallMultipleCircleHandlers(e, i) });
+  d3.selectAll("#geomap circle").on("click", function(e){ geoCircleHandlers(e) });
+}
+
+function averageTotalFundingCircleHandlers(e) {
+  var dataSeries = e.aggField[0];
+  var year = e.cx;
+  var data = [];
+  if (dataSeries == "Annual Companies Founded") {
+    for (var i = 0; i < bigData.length; i++) {
+      if (catFilterAllow(bigData[i]) && bigData[i].Founded == year) {
+        data.push(bigData[i]);
+      }
+    }
+  } else {
+    for (var i = 0; i < bigData.length; i++) {
+      if (catFilterAllow(bigData[i]) && bigData[i].Year == year) {
+        data.push(bigData[i]);
+      }
+    }
+  }
+  generateHTMLTableFromObjects(data);
+}
+
+function smallMultipleCircleHandlers(e, i) {
+  var data = [];
+  var date = new Date(e.cx);
+  var year = date.getYear() + 1900;
+  var cat = $($("#multiplePlaceholder circle")[i]).parent().parent().parent().parent().children().text().split(" (")[0];
+  if (e.aggField[0] == "Funding") {
+    for (var i = 0; i < bigData.length; i++) {
+      if (catFilterAllow(bigData[i]) && bigData[i].Year == year && bigData[i].Categories.indexOf(cat) != -1) {
+        data.push(bigData[i]);
+      }
+    }
+  } else {
+    for (var i = 0; i < bigData.length; i++) {
+      if (catFilterAllow(bigData[i]) && bigData[i].Founded == year && bigData[i].Categories.indexOf(cat) != -1) {
+        data.push(bigData[i]);
+      }
+    }
+  }
+  generateHTMLTableFromObjects(data);
+}
+
+function geoCircleHandlers(e) {
+  var data = [];
+  var area = e.key;
+  for (var i = 0; i < bigData.length; i++) {
+    if (catFilterAllow(bigData[i]) && bigData[i].Area == area && between(bigData[i].Founded)) {
+      data.push(bigData[i]);
+    }
+  }
+  generateHTMLTableFromObjects(data);
+}
+
+function generateHTMLTableFromObjects(data) {
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    html += '<tr>'
+    html += '<td><a href="' + data[i].Url + '">' + data[i].Name + '</a></td>'
+    html += '<td>' + stringifyCategories(data[i].Categories) + '</td>'
+    html += '<td>' + data[i].Area + '</td>'
+    html += '<td>' + data[i].Country + '</td>'
+    html += '<td>' + data[i].Founded + '</td>'
+    html += '<td style="text-align:right">$ ' + addCommas(data[i]["Funding Total"]) + '</td>'
+    html += '<td style="text-align:right">$ ' + addCommas(data[i].Amount) + '</td>'
+    html += '<td>' + data[i].Year + '</td>'
+    html += '<td>' + data[i].Status + '</td>'
+    html += '</tr>'
+  }
+  $("#detailtable-body").html(html);
+  if (!$("#detailtable-body").is(":visible")) {
+    $("#detailtable").slideToggle();
+    $("#detailtable-padder").slideToggle();
+  }
+}
+
+function toggleDetailTable() {
+  $("#detailtable").slideToggle();
+  $("#detailtable-padder").slideToggle();
 }
