@@ -153,8 +153,11 @@
     </div>
 
     <div class="detailtable" id="detailtable">
-        <div class="container">
-            <p onclick="toggleDetailTable()">Close Details</p>
+        <div class="container" style="position:relative;">
+            <p onclick="toggleDetailTable()">&nbsp;&nbsp;&nbsp;</p>
+            <div class="detailtableclose" onclick="toggleDetailTable()">
+              Close <span class="glyphicon glyphicon-remove"></span>
+            </div>
             <table class="table">
                 <thead>
                     <tr>

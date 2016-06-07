@@ -260,3 +260,10 @@ footer {
   color: #fff;
   font-weight: 700;
 }
+
+.detailtableclose {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  cursor: pointer;
+}

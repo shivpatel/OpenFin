@@ -123,6 +123,10 @@ $(function() {
         // y.overrideMin = 0;
         var s = annualTotalFunding.addSeries("Annual Funding Raised", dimple.plot.area, [x, y]);
 
+        s.shapes.on("click", function(e) {
+          dimple._showPointTooltip(e, this, annualTotalFunding, s);
+        });
+
         annualTotalFunding.draw();
 
         // small multiples
@@ -205,7 +209,7 @@ $(function() {
         snapSlider.noUiSlider.on('update', function(values, handle) {
             snapValues[handle].innerHTML = Number(values[handle]).toFixed(0);
             years[handle] = Number(values[handle]).toFixed(0);
-            filterVisuals(true, false);
+            // filterVisuals(true, false);
             regenerateWorld();
         });
 
@@ -443,6 +447,8 @@ function parseDataForGeoMap(data) {
 }
 
 function getGeoFilteredData(data) {
+  // performance testing
+  var startExec = Date.now();
   var result = []
   for (var i = 0; i < data.length; i++) {
       var catOk = catFilterAllow(data[i]);
@@ -454,6 +460,8 @@ function getGeoFilteredData(data) {
           result.push(data[i]);
       }
   }
+  var endExec = Date.now();
+  console.log("getGeoFilteredData execution time " + ((endExec - startExec) / 1000) + " seconds");
   return result;
 }
 
@@ -529,13 +537,17 @@ function calcAnnualTotalFundingData() {
             }
         }
     }
+    var companiesVisisted = new Set();
     for (var i = 0; i < bigData.length; i++) {
-      if (catFilterAllow(bigData[i])) {
-        var founded = Number(bigData[i].Founded);
-        for (var j = 0; j < tmp.length; j++) {
-          if (tmp[j].Year == founded) {
-            tmp[j]["Companies Founded"]++;
-            break;
+      if (!companiesVisisted.has(bigData[i].Name)) {
+        companiesVisisted.add(bigData[i].Name);
+        if (catFilterAllow(bigData[i])) {
+          var founded = Number(bigData[i].Founded);
+          for (var j = 0; j < tmp.length; j++) {
+            if (tmp[j].Year == founded) {
+              tmp[j]["Companies Founded"]++;
+              break;
+            }
           }
         }
       }
@@ -572,9 +584,12 @@ function catFilterAllow(item) {
 
 function getSmallMultipleData(data) {
     var tmp = [];
-    $.each(data, function(itemIndex, item) {
+    var visitedCompaniesForCompaniesFounded = [];
+    for (var i = 0; i < data.length; i++) {
+        var item = data[i];
         var processFounded = true;
         var processAmount = true;
+        var useForFoundedCount = true;
         if (item.Founded == null) {
             processFounded = false;
             item.Founded = 0;
@@ -583,8 +598,14 @@ function getSmallMultipleData(data) {
             processAmount = false;
             item.Amount = 0;
         }
+        if (visitedCompaniesForCompaniesFounded.indexOf(item.Name) != -1) {
+          useForFoundedCount = false;
+        } else {
+          visitedCompaniesForCompaniesFounded.push(item.Name);
+        }
         if (optionsAreas.indexOf(item.Area) != -1 && optionsCountries.indexOf(item.Country) != -1) {
-          $.each(item.Categories, function(catIndex, category) {
+          for (var j = 0; j < item.Categories.length; j++) {
+              var category = item.Categories[j];
               var catExist = categoryExist(category, tmp);
               if (catExist != -1) {
                   // category exists
@@ -605,7 +626,7 @@ function getSmallMultipleData(data) {
                       }
                   }
                   // founded
-                  if (processAmount) {
+                  if (processAmount && useForFoundedCount) {
                       var foundedYearExist = yearExist(item.Founded.toString(), tmp[catExist].FoundedPerYear);
                       if (foundedYearExist == -1) {
                           // founded year not in category
@@ -638,9 +659,9 @@ function getSmallMultipleData(data) {
                       }]
                   })
               }
-          });
+          }
         }
-    });
+    }
     return tmp;
 }
 
@@ -909,7 +930,7 @@ function generateHTMLTableFromObjects(data) {
   var html = '';
   for (var i = 0; i < data.length; i++) {
     html += '<tr>'
-    html += '<td><a href="' + data[i].Url + '">' + data[i].Name + '</a></td>'
+    html += '<td><a target="_blank" href="' + data[i].Url + '">' + data[i].Name + '</a></td>'
     html += '<td>' + stringifyCategories(data[i].Categories) + '</td>'
     html += '<td>' + data[i].Area + '</td>'
     html += '<td>' + data[i].Country + '</td>'
@@ -921,6 +942,12 @@ function generateHTMLTableFromObjects(data) {
     html += '</tr>'
   }
   $("#detailtable-body").html(html);
+  // for (var i = 0; i < data.length; i++) {
+  //   data[i].Categories    = stringifyCategories(data[i].Categories);
+  //   data[i].FundingTotal  = '$ ' + addCommas(data[i]["Funding Total"])
+  //   data[i].Amount        = '$ ' + addCommas(data[i].Amount)
+  // }
+  // $scope.activeCompanies = data;
   if (!$("#detailtable-body").is(":visible")) {
     $("#detailtable").slideToggle();
     $("#detailtable-padder").slideToggle();

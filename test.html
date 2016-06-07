@@ -5,19 +5,6 @@
 <script src="./js/lodash.js"></script>
 <script src="./js/bootstrap.min.js"></script>
 <script src="./js/nouislider.min.js"></script>
+<script src="./js/dev.js"></script>
 
-<script type="text/javascript">
-
-    d3.json("//localhost:3000/js/data.json", function(data) {
-
-      console.log("Running...")
-      console.log(JSON.stringify(getUniqueObjects(data)));
-      console.log("Done.")
-
-    });
-
-    function getUniqueObjects(data) {
-      return _.uniqWith(data, _.isEqual);
-    }
-
-</script>
+Console
